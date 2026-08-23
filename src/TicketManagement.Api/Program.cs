@@ -30,7 +30,12 @@ try
 
     // ---- Services ---------------------------------------------------------
 
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+        .AddJsonOptions(opts =>
+        {
+            // Allow enums to be passed as their string names (e.g. "Medium") in JSON bodies
+            opts.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        });
     builder.Services.AddEndpointsApiExplorer();
 
     builder.Services.AddApplication();

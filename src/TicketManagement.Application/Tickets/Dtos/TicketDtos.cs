@@ -32,26 +32,26 @@ public record TicketDetailDto(
     string RowVersion);
 
 public record CreateTicketRequest(
-    [property: Required, StringLength(200, MinimumLength = 3)] string Title,
-    [property: Required, StringLength(4000, MinimumLength = 5)] string Description,
+    [Required, StringLength(200, MinimumLength = 3)] string Title,
+    [Required, StringLength(4000, MinimumLength = 5)] string Description,
     TicketPriority Priority = TicketPriority.Medium);
 
 public record UpdateTicketDetailsRequest(
-    [property: Required, StringLength(200, MinimumLength = 3)] string Title,
-    [property: Required, StringLength(4000, MinimumLength = 5)] string Description,
-    [property: Required] string RowVersion);
+    [Required, StringLength(200, MinimumLength = 3)] string Title,
+    [Required, StringLength(4000, MinimumLength = 5)] string Description,
+    [Required] string RowVersion);
 
 public record UpdateTicketStatusRequest(
-    [property: Required] TicketStatus Status,
-    [property: Required] string RowVersion);
+    [Required] TicketStatus Status,
+    [Required] string RowVersion);
 
 public record UpdateTicketPriorityRequest(
-    [property: Required] TicketPriority Priority,
-    [property: Required] string RowVersion);
+    [Required] TicketPriority Priority,
+    [Required] string RowVersion);
 
 public record AssignTicketRequest(
     int? AssignedToUserId,
-    [property: Required] string RowVersion);
+    [Required] string RowVersion);
 
 public class TicketQueryParameters
 {
