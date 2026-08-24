@@ -54,8 +54,8 @@ public static class DbInitializer
         }
 
         var admin = new User { FullName = "Ahmed Hamada", Email = "enghamadafci99@gmail.com", Role = UserRole.Admin, PasswordHash = passwordHasher.Hash("Passw0rd!") };
-        var agent1 = new User { FullName = "Samy", Email = "agent1@invento.gmail", Role = UserRole.Agent, PasswordHash = passwordHasher.Hash("Passw0rd!") };
-        var agent2 = new User { FullName = "Nora", Email = "agent2@invento.gmail.com", Role = UserRole.Agent, PasswordHash = passwordHasher.Hash("Passw0rd!") };
+        var agent1 = new User { FullName = "Samy", Email = "agent1@gmail.com", Role = UserRole.Agent, PasswordHash = passwordHasher.Hash("Passw0rd!") };
+        var agent2 = new User { FullName = "Nora", Email = "agent2@gmail.com", Role = UserRole.Agent, PasswordHash = passwordHasher.Hash("Passw0rd!") };
         var customer1 = new User { FullName = "Sella Customer", Email = "customer1@gmail.com", Role = UserRole.Customer, PasswordHash = passwordHasher.Hash("Passw0rd!") };
         var customer2 = new User { FullName = "Heba Customer", Email = "customer2@gmail.com", Role = UserRole.Customer, PasswordHash = passwordHasher.Hash("Passw0rd!") };
 
