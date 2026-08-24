@@ -79,6 +79,11 @@ public class TicketService : ITicketService
 
     public async Task<TicketDetailDto> CreateTicketAsync(CreateTicketRequest request, CancellationToken ct = default)
     {
+        if (_currentUser.Role != UserRole.Customer)
+        {
+            throw new ForbiddenException("Only customers can create tickets.");
+        }
+
         var userId = RequireUserId();
 
         var ticket = new Ticket

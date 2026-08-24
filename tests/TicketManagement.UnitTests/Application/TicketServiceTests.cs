@@ -99,6 +99,23 @@ public class TicketServiceTests
         activity.Type.Should().Be(ActivityType.Created);
     }
 
+    [Theory]
+    [InlineData(UserRole.Admin)]
+    [InlineData(UserRole.Agent)]
+    public async Task CreateTicketAsync_NonCustomer_ThrowsForbidden(UserRole role)
+    {
+        await using var db = InMemoryDbContextFactory.Create();
+        db.Users.Add(MakeUser(1, role));
+        await db.SaveChangesAsync();
+
+        var currentUser = new FakeCurrentUserService(userId: 1, role: role);
+        var sut = new TicketService(db, currentUser, new FakeDateTimeProvider(), new NoOpTicketNotifier());
+
+        var act = async () => await sut.CreateTicketAsync(new CreateTicketRequest("New issue", "Something is broken", TicketPriority.High));
+
+        await act.Should().ThrowAsync<ForbiddenException>();
+    }
+
     [Fact]
     public async Task UpdateStatusAsync_InvalidTransition_ThrowsConflict_AndDoesNotChangeStatus()
     {

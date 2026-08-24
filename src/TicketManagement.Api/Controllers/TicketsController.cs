@@ -31,6 +31,7 @@ public class TicketsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Customer")]
     public async Task<ActionResult<TicketDetailDto>> CreateTicket(CreateTicketRequest request, CancellationToken ct)
     {
         var ticket = await _ticketService.CreateTicketAsync(request, ct);

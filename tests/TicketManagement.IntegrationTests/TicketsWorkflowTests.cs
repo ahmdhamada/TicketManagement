@@ -31,13 +31,15 @@ public class TicketsWorkflowTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task InvalidStatusTransition_ReturnsConflict()
     {
-        var client = await _factory.CreateClient().AsUserAsync("admin@invento.sa");
+        // Only a Customer can create the ticket; an Admin then drives the invalid transition.
+        var customerClient = await _factory.CreateClient().AsUserAsync("customer1@invento.sa");
+        var adminClient = await _factory.CreateClient().AsUserAsync("admin@invento.sa");
 
-        var createResponse = await client.PostAsJsonAsync("/api/tickets", new CreateTicketRequest("Some issue", "Description of the issue"));
+        var createResponse = await customerClient.PostAsJsonAsync("/api/tickets", new CreateTicketRequest("Some issue", "Description of the issue"));
         var created = (await createResponse.Content.ReadFromJsonAsync<TicketDetailDto>())!;
 
         // Open -> Resolved is not a valid direct transition.
-        var response = await client.PatchAsJsonAsync($"/api/tickets/{created.Id}/status", new UpdateTicketStatusRequest(TicketManagement.Domain.Enums.TicketStatus.Resolved, created.RowVersion));
+        var response = await adminClient.PatchAsJsonAsync($"/api/tickets/{created.Id}/status", new UpdateTicketStatusRequest(TicketManagement.Domain.Enums.TicketStatus.Resolved, created.RowVersion));
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
@@ -45,17 +47,30 @@ public class TicketsWorkflowTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task StaleRowVersion_OnConcurrentUpdate_ReturnsConflict()
     {
-        var client = await _factory.CreateClient().AsUserAsync("admin@invento.sa");
+        var customerClient = await _factory.CreateClient().AsUserAsync("customer1@invento.sa");
+        var adminClient = await _factory.CreateClient().AsUserAsync("admin@invento.sa");
 
-        var createResponse = await client.PostAsJsonAsync("/api/tickets", new CreateTicketRequest("Concurrency test", "Testing optimistic concurrency"));
+        var createResponse = await customerClient.PostAsJsonAsync("/api/tickets", new CreateTicketRequest("Concurrency test", "Testing optimistic concurrency"));
         var created = (await createResponse.Content.ReadFromJsonAsync<TicketDetailDto>())!;
 
         // First update succeeds and advances the RowVersion.
-        var firstUpdate = await client.PatchAsJsonAsync($"/api/tickets/{created.Id}/status", new UpdateTicketStatusRequest(TicketManagement.Domain.Enums.TicketStatus.InProgress, created.RowVersion));
+        var firstUpdate = await adminClient.PatchAsJsonAsync($"/api/tickets/{created.Id}/status", new UpdateTicketStatusRequest(TicketManagement.Domain.Enums.TicketStatus.InProgress, created.RowVersion));
         firstUpdate.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Reusing the now-stale RowVersion from the original fetch must be rejected.
-        var staleUpdate = await client.PatchAsJsonAsync($"/api/tickets/{created.Id}/priority", new UpdateTicketPriorityRequest(TicketManagement.Domain.Enums.TicketPriority.Critical, created.RowVersion));
+        var staleUpdate = await adminClient.PatchAsJsonAsync($"/api/tickets/{created.Id}/priority", new UpdateTicketPriorityRequest(TicketManagement.Domain.Enums.TicketPriority.Critical, created.RowVersion));
         staleUpdate.StatusCode.Should().Be(HttpStatusCode.Conflict);
+    }
+
+    [Theory]
+    [InlineData("admin@invento.sa")]
+    [InlineData("agent1@invento.sa")]
+    public async Task NonCustomer_CannotCreateTicket_ReturnsForbidden(string email)
+    {
+        var client = await _factory.CreateClient().AsUserAsync(email);
+
+        var response = await client.PostAsJsonAsync("/api/tickets", new CreateTicketRequest("Should not be allowed", "Only customers may open tickets"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }
