@@ -76,7 +76,7 @@ try
             ValidIssuer = jwtOptions.Issuer,
             ValidAudience = jwtOptions.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(jwtOptions.SigningKey)),
-            ClockSkew = TimeSpan.FromSeconds(30)
+            ClockSkew = TimeSpan.FromSeconds(30) // allow a small clock skew to account for time differences between servers and clients
         };
 
         // Allow SignalR clients to pass the JWT via the query string (WebSockets can't set headers).

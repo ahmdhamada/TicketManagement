@@ -16,7 +16,7 @@ public class TicketsWorkflowTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task Customer_CanCreateTicket_ThenSeeItInTheirList()
     {
-        var client = await _factory.CreateClient().AsUserAsync("customer1@invento.sa");
+        var client = await _factory.CreateClient().AsUserAsync("customer1@gmail.com");
 
         var createResponse = await client.PostAsJsonAsync("/api/tickets", new CreateTicketRequest("Printer is on fire", "Literally smoking, please help"));
         createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -32,8 +32,8 @@ public class TicketsWorkflowTests : IClassFixture<CustomWebApplicationFactory>
     public async Task InvalidStatusTransition_ReturnsConflict()
     {
         // Only a Customer can create the ticket; an Admin then drives the invalid transition.
-        var customerClient = await _factory.CreateClient().AsUserAsync("customer1@invento.sa");
-        var adminClient = await _factory.CreateClient().AsUserAsync("admin@invento.sa");
+        var customerClient = await _factory.CreateClient().AsUserAsync("customer1@gmail.com");
+        var adminClient = await _factory.CreateClient().AsUserAsync("admin@gmail.com");
 
         var createResponse = await customerClient.PostAsJsonAsync("/api/tickets", new CreateTicketRequest("Some issue", "Description of the issue"));
         var created = (await createResponse.Content.ReadFromJsonAsync<TicketDetailDto>())!;
@@ -47,8 +47,8 @@ public class TicketsWorkflowTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task StaleRowVersion_OnConcurrentUpdate_ReturnsConflict()
     {
-        var customerClient = await _factory.CreateClient().AsUserAsync("customer1@invento.sa");
-        var adminClient = await _factory.CreateClient().AsUserAsync("admin@invento.sa");
+        var customerClient = await _factory.CreateClient().AsUserAsync("customer1@gmail.com");
+        var adminClient = await _factory.CreateClient().AsUserAsync("enghamadafci99@gmail@gmail.com");
 
         var createResponse = await customerClient.PostAsJsonAsync("/api/tickets", new CreateTicketRequest("Concurrency test", "Testing optimistic concurrency"));
         var created = (await createResponse.Content.ReadFromJsonAsync<TicketDetailDto>())!;
